@@ -1,23 +1,24 @@
+import logging
+import os
+
 import tornado.ioloop
 import tornado.web
 import tornado.gen
 import tornado.process
-import os
+import tornado.log
 
-STREAM = tornado.process.Subprocess.STREAM
 
 update_script = os.path.join(os.path.dirname(os.path.dirname(__file__)),
                              'update.sh')
 
+
 class MainHandler(tornado.web.RequestHandler):
     @tornado.gen.coroutine
     def get(self):
-        print('Handling')
+        logging.info('About to start the update process.')
         self.write("Working...<br>")
         self.flush()
         proc = tornado.process.Subprocess([update_script])
-        yield proc.wait_for_exit()
-        proc = tornado.process.Subprocess(['sleep', '5'])
         yield proc.wait_for_exit()
         self.write("Daemon updated")
 
@@ -29,7 +30,6 @@ def make_app():
 
 
 if __name__ == "__main__":
-    import tornado.log
     tornado.log.enable_pretty_logging()
     app = make_app()
     app.listen(8888)
